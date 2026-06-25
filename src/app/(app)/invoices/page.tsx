@@ -3,16 +3,32 @@ import { FileStack, Plus } from "lucide-react";
 import { apiFetch } from "@/lib/api";
 import { formatCurrency, formatDate } from "@/lib/format";
 import { StatusBadge } from "@/components/status-badge";
-import { INVOICE_STATUSES, type Invoice, type InvoiceStatus } from "@/lib/types";
+import { SearchBox } from "@/components/search-box";
+import { Pagination } from "@/components/pagination";
+import { INVOICE_STATUSES, type Invoice, type InvoiceStatus, type Paginated } from "@/lib/types";
 
 export default async function InvoicesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string }>;
+  searchParams: Promise<{ status?: string; search?: string; page?: string }>;
 }) {
-  const { status } = await searchParams;
-  const query = status ? `?status=${status}` : "";
-  const invoices = await apiFetch<Invoice[]>(`/invoices${query}`);
+  const { status, search, page } = await searchParams;
+  const currentPage = page ? Number(page) : 1;
+
+  const query = new URLSearchParams();
+  if (status) query.set("status", status);
+  if (search) query.set("search", search);
+  query.set("page", String(currentPage));
+  query.set("limit", "10");
+
+  const { data: invoices, meta } = await apiFetch<Paginated<Invoice>>(`/invoices?${query}`);
+
+  function statusHref(s?: InvoiceStatus) {
+    const params = new URLSearchParams();
+    if (s) params.set("status", s);
+    if (search) params.set("search", search);
+    return `/invoices?${params}`;
+  }
 
   return (
     <div className="space-y-6">
@@ -27,26 +43,34 @@ export default async function InvoicesPage({
         </Link>
       </div>
 
-      <div className="flex gap-2">
-        <Link
-          href="/invoices"
-          className={`rounded-full px-3 py-1 text-xs font-medium ${
-            !status ? "bg-zinc-100 text-zinc-900" : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700"
-          }`}
-        >
-          All
-        </Link>
-        {INVOICE_STATUSES.map((s: InvoiceStatus) => (
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex gap-2">
           <Link
-            key={s}
-            href={`/invoices?status=${s}`}
+            href={statusHref()}
             className={`rounded-full px-3 py-1 text-xs font-medium ${
-              status === s ? "bg-zinc-100 text-zinc-900" : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700"
+              !status ? "bg-zinc-100 text-zinc-900" : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700"
             }`}
           >
-            {s}
+            All
           </Link>
-        ))}
+          {INVOICE_STATUSES.map((s: InvoiceStatus) => (
+            <Link
+              key={s}
+              href={statusHref(s)}
+              className={`rounded-full px-3 py-1 text-xs font-medium ${
+                status === s ? "bg-zinc-100 text-zinc-900" : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700"
+              }`}
+            >
+              {s}
+            </Link>
+          ))}
+        </div>
+        <SearchBox
+          action="/invoices"
+          placeholder="Search by invoice # or customer…"
+          defaultValue={search}
+          hiddenFields={{ status }}
+        />
       </div>
 
       <div className="rounded-lg border border-zinc-800 bg-zinc-900 shadow-sm">
@@ -88,6 +112,12 @@ export default async function InvoicesPage({
             )}
           </tbody>
         </table>
+        <Pagination
+          basePath="/invoices"
+          query={{ search, status }}
+          page={meta.page}
+          totalPages={meta.totalPages}
+        />
       </div>
     </div>
   );

@@ -6,7 +6,7 @@ import { updateCustomerAction, deleteCustomerAction } from "@/lib/actions/custom
 import { CustomerForm } from "@/components/customer-form";
 import { StatusBadge } from "@/components/status-badge";
 import { formatCurrency } from "@/lib/format";
-import type { Customer, Invoice } from "@/lib/types";
+import type { Customer, Invoice, Paginated } from "@/lib/types";
 
 export default async function CustomerDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -19,8 +19,9 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
     throw err;
   }
 
-  const invoices = await apiFetch<Invoice[]>("/invoices");
-  const customerInvoices = invoices.filter((invoice) => invoice.customerId === id);
+  const { data: customerInvoices } = await apiFetch<Paginated<Invoice>>(
+    `/invoices?customerId=${id}&limit=100`,
+  );
 
   const boundUpdate = updateCustomerAction.bind(null, id);
   const boundDelete = deleteCustomerAction.bind(null, id);

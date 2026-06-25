@@ -1,9 +1,9 @@
 import { apiFetch } from "@/lib/api";
-import type { Customer } from "@/lib/types";
+import type { Customer, Paginated } from "@/lib/types";
 import { InvoiceForm } from "@/components/invoice-form";
 
 export default async function NewInvoicePage() {
-  const customers = await apiFetch<Customer[]>("/customers");
+  const { data: customers } = await apiFetch<Paginated<Customer>>("/customers?limit=100");
 
   return (
     <div className="max-w-2xl space-y-6">
