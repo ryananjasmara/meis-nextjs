@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { FileStack, Plus } from "lucide-react";
 import { apiFetch } from "@/lib/api";
 import { formatCurrency, formatDate } from "@/lib/format";
 import { StatusBadge } from "@/components/status-badge";
@@ -19,8 +20,9 @@ export default async function InvoicesPage({
         <h1 className="text-2xl font-semibold text-zinc-50">Invoices</h1>
         <Link
           href="/invoices/new"
-          className="rounded-md bg-zinc-100 px-4 py-2 text-sm font-medium text-zinc-900 hover:bg-white"
+          className="flex items-center gap-1.5 rounded-md bg-zinc-100 px-4 py-2 text-sm font-medium text-zinc-900 hover:bg-white"
         >
+          <Plus className="size-4" />
           New invoice
         </Link>
       </div>
@@ -78,7 +80,8 @@ export default async function InvoicesPage({
             ))}
             {invoices.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-5 py-6 text-center text-zinc-500">
+                <td colSpan={6} className="px-5 py-10 text-center text-zinc-500">
+                  <FileStack className="mx-auto mb-2 size-6 text-zinc-600" />
                   No invoices found.
                 </td>
               </tr>

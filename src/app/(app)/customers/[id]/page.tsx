@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Receipt, Trash2 } from "lucide-react";
 import { apiFetch, ApiError } from "@/lib/api";
 import { updateCustomerAction, deleteCustomerAction } from "@/lib/actions/customers";
 import { CustomerForm } from "@/components/customer-form";
@@ -29,7 +30,11 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold text-zinc-50">{customer.name}</h1>
         <form action={boundDelete}>
-          <button type="submit" className="text-sm font-medium text-red-400 hover:underline">
+          <button
+            type="submit"
+            className="flex items-center gap-1.5 text-sm font-medium text-red-400 hover:underline"
+          >
+            <Trash2 className="size-4" />
             Delete customer
           </button>
         </form>
@@ -41,7 +46,10 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
 
       <div className="rounded-lg border border-zinc-800 bg-zinc-900 shadow-sm">
         <div className="border-b border-zinc-800 px-5 py-4">
-          <h2 className="text-sm font-medium text-zinc-300">Invoices</h2>
+          <h2 className="flex items-center gap-2 text-sm font-medium text-zinc-300">
+            <Receipt className="size-4" />
+            Invoices
+          </h2>
         </div>
         <table className="w-full text-sm">
           <tbody>

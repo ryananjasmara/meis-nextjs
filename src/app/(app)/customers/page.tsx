@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Plus, Users } from "lucide-react";
 import { apiFetch } from "@/lib/api";
 import type { Customer } from "@/lib/types";
 
@@ -11,8 +12,9 @@ export default async function CustomersPage() {
         <h1 className="text-2xl font-semibold text-zinc-50">Customers</h1>
         <Link
           href="/customers/new"
-          className="rounded-md bg-zinc-100 px-4 py-2 text-sm font-medium text-zinc-900 hover:bg-white"
+          className="flex items-center gap-1.5 rounded-md bg-zinc-100 px-4 py-2 text-sm font-medium text-zinc-900 hover:bg-white"
         >
+          <Plus className="size-4" />
           New customer
         </Link>
       </div>
@@ -43,7 +45,8 @@ export default async function CustomersPage() {
             ))}
             {customers.length === 0 && (
               <tr>
-                <td colSpan={3} className="px-5 py-6 text-center text-zinc-500">
+                <td colSpan={3} className="px-5 py-10 text-center text-zinc-500">
+                  <Users className="mx-auto mb-2 size-6 text-zinc-600" />
                   No customers yet.
                 </td>
               </tr>

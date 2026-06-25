@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BarChart3, Clock3, FileStack, ListChecks, Users, Wallet } from "lucide-react";
 import { apiFetch } from "@/lib/api";
 import { formatCurrency, formatDate } from "@/lib/format";
 import type { DashboardSummary, InvoiceStatus } from "@/lib/types";
@@ -15,14 +16,22 @@ export default async function DashboardPage() {
       <h1 className="text-2xl font-semibold text-zinc-50">Dashboard</h1>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Customers" value={String(summary.totalCustomers)} />
-        <StatCard label="Invoices" value={String(summary.totalInvoices)} />
-        <StatCard label="Revenue (paid)" value={formatCurrency(summary.totalRevenue)} />
-        <StatCard label="Outstanding" value={formatCurrency(summary.outstandingAmount)} hint="Sent + overdue" />
+        <StatCard label="Customers" value={String(summary.totalCustomers)} icon={Users} />
+        <StatCard label="Invoices" value={String(summary.totalInvoices)} icon={FileStack} />
+        <StatCard label="Revenue (paid)" value={formatCurrency(summary.totalRevenue)} icon={Wallet} />
+        <StatCard
+          label="Outstanding"
+          value={formatCurrency(summary.outstandingAmount)}
+          hint="Sent + overdue"
+          icon={Clock3}
+        />
       </div>
 
       <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-5 shadow-sm">
-        <h2 className="text-sm font-medium text-zinc-300">Invoices by status</h2>
+        <h2 className="flex items-center gap-2 text-sm font-medium text-zinc-300">
+          <BarChart3 className="size-4" />
+          Invoices by status
+        </h2>
         <div className="mt-4 flex flex-wrap gap-3">
           {STATUS_ORDER.map((status) => (
             <div key={status} className="flex items-center gap-2 rounded-md border border-zinc-800 px-3 py-2">
@@ -35,7 +44,10 @@ export default async function DashboardPage() {
 
       <div className="rounded-lg border border-zinc-800 bg-zinc-900 shadow-sm">
         <div className="flex items-center justify-between border-b border-zinc-800 px-5 py-4">
-          <h2 className="text-sm font-medium text-zinc-300">Recent invoices</h2>
+          <h2 className="flex items-center gap-2 text-sm font-medium text-zinc-300">
+            <ListChecks className="size-4" />
+            Recent invoices
+          </h2>
           <Link href="/invoices" className="text-sm font-medium text-zinc-50 hover:underline">
             View all
           </Link>

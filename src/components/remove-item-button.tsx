@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { Trash2 } from "lucide-react";
 import { removeInvoiceItemAction } from "@/lib/actions/invoices";
 
 export function RemoveItemButton({ invoiceId, itemId }: { invoiceId: string; itemId: string }) {
@@ -22,8 +23,9 @@ export function RemoveItemButton({ invoiceId, itemId }: { invoiceId: string; ite
             }
           });
         }}
-        className="text-xs font-medium text-red-400 hover:underline disabled:opacity-50"
+        className="inline-flex items-center gap-1 text-xs font-medium text-red-400 hover:underline disabled:opacity-50"
       >
+        <Trash2 className="size-3.5" />
         {isPending ? "Removing…" : "Remove"}
       </button>
       {error && <p className="mt-1 text-xs text-red-400">{error}</p>}

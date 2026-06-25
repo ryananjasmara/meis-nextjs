@@ -2,6 +2,7 @@
 
 import { useRef, useState, useTransition } from "react";
 import { updateInvoiceStatusAction } from "@/lib/actions/invoices";
+import { Select } from "@/components/select";
 import { INVOICE_STATUSES, type InvoiceStatus } from "@/lib/types";
 
 export function StatusSelect({ invoiceId, status }: { invoiceId: string; status: InvoiceStatus }) {
@@ -41,18 +42,18 @@ export function StatusSelect({ invoiceId, status }: { invoiceId: string; status:
 
   return (
     <>
-      <select
+      <Select
         value={value}
         disabled={isPending}
         onChange={(e) => requestChange(e.target.value as InvoiceStatus)}
-        className="rounded-md border border-zinc-700 bg-zinc-900 px-3 py-1.5 text-sm text-zinc-100 focus:border-zinc-500 focus:outline-none disabled:opacity-50"
+        className="py-1.5"
       >
         {INVOICE_STATUSES.map((s) => (
           <option key={s} value={s}>
             {s}
           </option>
         ))}
-      </select>
+      </Select>
       {error && <p className="mt-1 text-xs text-red-400">{error}</p>}
 
       <dialog

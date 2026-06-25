@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { FileStack, LayoutDashboard, LogOut, Receipt, Users } from "lucide-react";
 import { getCurrentUser } from "@/lib/session";
 import { logoutAction } from "@/lib/actions/auth";
 
@@ -10,15 +11,21 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       <header className="border-b border-zinc-800 bg-zinc-900">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-8">
-            <span className="text-base font-semibold text-zinc-50">Mini ERP</span>
+            <span className="flex items-center gap-2 text-base font-semibold text-zinc-50">
+              <Receipt className="size-5" />
+              Mini ERP
+            </span>
             <nav className="flex gap-6 text-sm font-medium text-zinc-400">
-              <Link href="/dashboard" className="hover:text-zinc-50">
+              <Link href="/dashboard" className="flex items-center gap-1.5 hover:text-zinc-50">
+                <LayoutDashboard className="size-4" />
                 Dashboard
               </Link>
-              <Link href="/customers" className="hover:text-zinc-50">
+              <Link href="/customers" className="flex items-center gap-1.5 hover:text-zinc-50">
+                <Users className="size-4" />
                 Customers
               </Link>
-              <Link href="/invoices" className="hover:text-zinc-50">
+              <Link href="/invoices" className="flex items-center gap-1.5 hover:text-zinc-50">
+                <FileStack className="size-4" />
                 Invoices
               </Link>
             </nav>
@@ -30,7 +37,11 @@ export default async function AppLayout({ children }: { children: React.ReactNod
               </span>
             )}
             <form action={logoutAction}>
-              <button type="submit" className="font-medium text-zinc-50 hover:underline">
+              <button
+                type="submit"
+                className="flex items-center gap-1.5 font-medium text-zinc-50 hover:underline"
+              >
+                <LogOut className="size-4" />
                 Log out
               </button>
             </form>

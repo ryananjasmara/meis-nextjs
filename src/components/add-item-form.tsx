@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import { Plus } from "lucide-react";
 import { addInvoiceItemAction } from "@/lib/actions/invoices";
 
 const inputClass =
@@ -32,8 +33,9 @@ export function AddItemForm({ invoiceId }: { invoiceId: string }) {
       <button
         type="submit"
         disabled={pending}
-        className="rounded-md bg-zinc-100 px-3 py-2 text-sm font-medium text-zinc-900 hover:bg-white disabled:opacity-50"
+        className="flex items-center gap-1.5 rounded-md bg-zinc-100 px-3 py-2 text-sm font-medium text-zinc-900 hover:bg-white disabled:opacity-50"
       >
+        <Plus className="size-4" />
         {pending ? "Adding…" : "Add item"}
       </button>
       {state?.error && <p className="w-full text-sm text-red-400">{state.error}</p>}

@@ -1,3 +1,4 @@
+import { AlertTriangle, CheckCircle2, CircleDashed, Send, XCircle, type LucideIcon } from "lucide-react";
 import type { InvoiceStatus } from "@/lib/types";
 
 const STYLES: Record<InvoiceStatus, string> = {
@@ -8,11 +9,21 @@ const STYLES: Record<InvoiceStatus, string> = {
   CANCELLED: "bg-zinc-800 text-zinc-500 line-through",
 };
 
+const ICONS: Record<InvoiceStatus, LucideIcon> = {
+  DRAFT: CircleDashed,
+  SENT: Send,
+  PAID: CheckCircle2,
+  OVERDUE: AlertTriangle,
+  CANCELLED: XCircle,
+};
+
 export function StatusBadge({ status }: { status: InvoiceStatus }) {
+  const Icon = ICONS[status];
   return (
     <span
-      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${STYLES[status]}`}
+      className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${STYLES[status]}`}
     >
+      <Icon className="size-3" />
       {status}
     </span>
   );

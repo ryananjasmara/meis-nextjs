@@ -1,8 +1,10 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import { Plus, Trash2 } from "lucide-react";
 import { createInvoiceAction } from "@/lib/actions/invoices";
 import { formatCurrency } from "@/lib/format";
+import { Select } from "@/components/select";
 import type { Customer } from "@/lib/types";
 
 type Row = { description: string; quantity: string; unitPrice: string };
@@ -32,13 +34,7 @@ export function InvoiceForm({ customers }: { customers: Customer[] }) {
         <label htmlFor="customerId" className="block text-sm font-medium text-zinc-300">
           Customer
         </label>
-        <select
-          id="customerId"
-          name="customerId"
-          required
-          defaultValue=""
-          className={`mt-1 w-full ${inputClass}`}
-        >
+        <Select id="customerId" name="customerId" required defaultValue="" className="mt-1 w-full">
           <option value="" disabled>
             Select a customer
           </option>
@@ -47,7 +43,7 @@ export function InvoiceForm({ customers }: { customers: Customer[] }) {
               {customer.name}
             </option>
           ))}
-        </select>
+        </Select>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
@@ -71,9 +67,10 @@ export function InvoiceForm({ customers }: { customers: Customer[] }) {
           <button
             type="button"
             onClick={() => setRows((prev) => [...prev, { ...emptyRow }])}
-            className="text-sm font-medium text-zinc-50 hover:underline"
+            className="flex items-center gap-1 text-sm font-medium text-zinc-50 hover:underline"
           >
-            + Add item
+            <Plus className="size-4" />
+            Add item
           </button>
         </div>
 
@@ -110,9 +107,9 @@ export function InvoiceForm({ customers }: { customers: Customer[] }) {
                 type="button"
                 onClick={() => setRows((prev) => prev.filter((_, i) => i !== index))}
                 disabled={rows.length === 1}
-                className="px-2 text-sm text-red-400 hover:underline disabled:opacity-30"
+                className="flex items-center px-2 text-sm text-red-400 hover:underline disabled:opacity-30"
               >
-                Remove
+                <Trash2 className="size-4" />
               </button>
             </div>
           ))}
