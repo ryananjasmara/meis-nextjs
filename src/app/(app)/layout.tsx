@@ -12,8 +12,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-8">
             <span className="flex items-center gap-2 text-base font-semibold text-zinc-50">
-              <Receipt className="size-5" />
-              Mini ERP
+              mEis
             </span>
             <nav className="flex gap-6 text-sm font-medium text-zinc-400">
               <Link href="/dashboard" className="flex items-center gap-1.5 hover:text-zinc-50">
