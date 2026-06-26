@@ -7,6 +7,7 @@ import { StatusSelect } from "@/components/status-select";
 import { AddItemForm } from "@/components/add-item-form";
 import { EditableItemRow } from "@/components/editable-item-row";
 import { EditableDueDate } from "@/components/editable-due-date";
+import { EditableNotes } from "@/components/editable-notes";
 import type { Invoice } from "@/lib/types";
 
 export default async function InvoiceDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -58,10 +59,16 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
           <p className="text-xs uppercase text-zinc-500">Total</p>
           <p className="mt-1 text-sm font-semibold text-zinc-50">{formatCurrency(invoice.totalAmount)}</p>
         </div>
-        {invoice.notes && (
+        {(isDraft || invoice.notes) && (
           <div className="col-span-3 border-t border-zinc-800 pt-3">
             <p className="text-xs uppercase text-zinc-500">Notes</p>
-            <p className="mt-1 text-sm text-zinc-300">{invoice.notes}</p>
+            {isDraft ? (
+              <div className="mt-1">
+                <EditableNotes invoiceId={invoice.id} notes={invoice.notes} />
+              </div>
+            ) : (
+              <p className="mt-1 text-sm text-zinc-300">{invoice.notes}</p>
+            )}
           </div>
         )}
       </div>

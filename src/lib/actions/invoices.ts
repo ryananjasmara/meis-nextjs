@@ -95,6 +95,11 @@ export async function updateInvoiceDueDateAction(invoiceId: string, dueDate: str
   revalidatePath("/dashboard");
 }
 
+export async function updateInvoiceNotesAction(invoiceId: string, notes: string) {
+  await apiFetch<Invoice>(`/invoices/${invoiceId}`, { method: "PATCH", body: { notes } });
+  revalidatePath(`/invoices/${invoiceId}`);
+}
+
 export async function updateInvoiceItemAction(
   invoiceId: string,
   itemId: string,
