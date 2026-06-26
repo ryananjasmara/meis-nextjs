@@ -61,7 +61,13 @@ export async function updateCustomerAction(
   return { customerId: id };
 }
 
-export async function deleteCustomerAction(id: string) {
-  await apiFetch(`/customers/${id}`, { method: "DELETE" });
+export async function deleteCustomerAction(id: string): Promise<{ error?: string }> {
+  try {
+    await apiFetch(`/customers/${id}`, { method: "DELETE" });
+  } catch (err) {
+    return { error: err instanceof ApiError ? err.message : "Could not delete customer." };
+  }
+
   revalidatePath("/customers");
+  return {};
 }

@@ -12,13 +12,13 @@ export function DeleteCustomerButton({ customerId }: { customerId: string }) {
 
   function remove() {
     startTransition(async () => {
-      try {
-        await deleteCustomerAction(customerId);
-        toast.success("Customer deleted.");
-        router.push("/customers");
-      } catch {
-        toast.error("Could not delete customer.");
+      const result = await deleteCustomerAction(customerId);
+      if (result.error) {
+        toast.error(result.error);
+        return;
       }
+      toast.success("Customer deleted.");
+      router.push("/customers");
     });
   }
 
