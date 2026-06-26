@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Receipt, Trash2 } from "lucide-react";
+import { Receipt } from "lucide-react";
 import { apiFetch, ApiError } from "@/lib/api";
-import { updateCustomerAction, deleteCustomerAction } from "@/lib/actions/customers";
+import { updateCustomerAction } from "@/lib/actions/customers";
 import { CustomerForm } from "@/components/customer-form";
+import { DeleteCustomerButton } from "@/components/delete-customer-button";
 import { StatusBadge } from "@/components/status-badge";
 import { formatCurrency } from "@/lib/format";
 import type { Customer, Invoice, Paginated } from "@/lib/types";
@@ -24,21 +25,12 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
   );
 
   const boundUpdate = updateCustomerAction.bind(null, id);
-  const boundDelete = deleteCustomerAction.bind(null, id);
 
   return (
     <div className="max-w-2xl space-y-8">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold text-zinc-50">{customer.name}</h1>
-        <form action={boundDelete}>
-          <button
-            type="submit"
-            className="flex items-center gap-1.5 text-sm font-medium text-red-400 hover:underline"
-          >
-            <Trash2 className="size-4" />
-            Delete customer
-          </button>
-        </form>
+        <DeleteCustomerButton customerId={id} />
       </div>
 
       <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-6 shadow-sm">

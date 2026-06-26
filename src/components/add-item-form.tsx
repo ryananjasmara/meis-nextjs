@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef } from "react";
+import { toast } from "sonner";
 import { Plus } from "lucide-react";
 import { addInvoiceItemAction } from "@/lib/actions/invoices";
 
@@ -10,6 +11,17 @@ const inputClass =
 export function AddItemForm({ invoiceId }: { invoiceId: string }) {
   const action = addInvoiceItemAction.bind(null, invoiceId);
   const [state, formAction, pending] = useActionState(action, undefined);
+  const handledRef = useRef(state);
+
+  useEffect(() => {
+    if (!state || state === handledRef.current) return;
+    handledRef.current = state;
+    if (state.error) {
+      toast.error(state.error);
+    } else if (state.success) {
+      toast.success("Item added.");
+    }
+  }, [state]);
 
   return (
     <form action={formAction} className="flex flex-wrap items-end gap-2">
@@ -38,7 +50,6 @@ export function AddItemForm({ invoiceId }: { invoiceId: string }) {
         <Plus className="size-4" />
         {pending ? "Adding…" : "Add item"}
       </button>
-      {state?.error && <p className="w-full text-sm text-red-400">{state.error}</p>}
     </form>
   );
 }

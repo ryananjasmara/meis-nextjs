@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, useTransition } from "react";
+import { toast } from "sonner";
 import { updateInvoiceStatusAction } from "@/lib/actions/invoices";
 import { Select } from "@/components/select";
 import { INVOICE_STATUSES, type InvoiceStatus } from "@/lib/types";
@@ -8,12 +9,10 @@ import { INVOICE_STATUSES, type InvoiceStatus } from "@/lib/types";
 export function StatusSelect({ invoiceId, status }: { invoiceId: string; status: InvoiceStatus }) {
   const [value, setValue] = useState(status);
   const [pendingValue, setPendingValue] = useState<InvoiceStatus | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const dialogRef = useRef<HTMLDialogElement>(null);
 
   function requestChange(next: InvoiceStatus) {
-    setError(null);
     setPendingValue(next);
     dialogRef.current?.showModal();
   }
@@ -33,9 +32,10 @@ export function StatusSelect({ invoiceId, status }: { invoiceId: string; status:
     startTransition(async () => {
       try {
         await updateInvoiceStatusAction(invoiceId, next);
+        toast.success(`Status changed to ${next}.`);
       } catch {
         setValue(status);
-        setError("Could not update status.");
+        toast.error("Could not update status.");
       }
     });
   }
@@ -54,7 +54,6 @@ export function StatusSelect({ invoiceId, status }: { invoiceId: string; status:
           </option>
         ))}
       </Select>
-      {error && <p className="mt-1 text-xs text-red-400">{error}</p>}
 
       <dialog
         ref={dialogRef}

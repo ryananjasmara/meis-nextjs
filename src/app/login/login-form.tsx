@@ -1,11 +1,26 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { LogIn, Lock, Mail } from "lucide-react";
 import { loginAction } from "@/lib/actions/auth";
 
 export default function LoginForm() {
   const [state, action, pending] = useActionState(loginAction, undefined);
+  const router = useRouter();
+  const handledRef = useRef(state);
+
+  useEffect(() => {
+    if (!state || state === handledRef.current) return;
+    handledRef.current = state;
+    if (state.error) {
+      toast.error(state.error);
+    } else if (state.success) {
+      toast.success("Welcome back!");
+      router.push("/dashboard");
+    }
+  }, [state, router]);
 
   return (
     <form action={action} className="mt-6 space-y-4">
@@ -44,9 +59,6 @@ export default function LoginForm() {
           />
         </div>
       </div>
-      {state?.error && (
-        <p className="rounded-md bg-red-950 px-3 py-2 text-sm text-red-300">{state.error}</p>
-      )}
       <button
         type="submit"
         disabled={pending}

@@ -1,6 +1,8 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { Plus, Trash2 } from "lucide-react";
 import { createInvoiceAction } from "@/lib/actions/invoices";
 import { formatCurrency } from "@/lib/format";
@@ -17,6 +19,19 @@ const inputClass =
 export function InvoiceForm({ customers }: { customers: Customer[] }) {
   const [state, formAction, pending] = useActionState(createInvoiceAction, undefined);
   const [rows, setRows] = useState<Row[]>([{ ...emptyRow }]);
+  const router = useRouter();
+  const handledRef = useRef(state);
+
+  useEffect(() => {
+    if (!state || state === handledRef.current) return;
+    handledRef.current = state;
+    if (state.error) {
+      toast.error(state.error);
+    } else if (state.invoiceId) {
+      toast.success("Invoice created.");
+      router.push(`/invoices/${state.invoiceId}`);
+    }
+  }, [state, router]);
 
   const total = rows.reduce((sum, row) => {
     const qty = Number(row.quantity) || 0;
@@ -119,10 +134,6 @@ export function InvoiceForm({ customers }: { customers: Customer[] }) {
           Total: {formatCurrency(total)}
         </p>
       </div>
-
-      {state?.error && (
-        <p className="rounded-md bg-red-950 px-3 py-2 text-sm text-red-300">{state.error}</p>
-      )}
 
       <button
         type="submit"

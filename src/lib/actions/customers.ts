@@ -1,11 +1,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { apiFetch, ApiError } from "@/lib/api";
 import type { Customer } from "@/lib/types";
 
-export type CustomerFormState = { error?: string } | undefined;
+export type CustomerFormState = { error?: string; customerId?: string } | undefined;
 
 function customerPayload(formData: FormData) {
   const name = String(formData.get("name") ?? "").trim();
@@ -38,7 +37,7 @@ export async function createCustomerAction(
   }
 
   revalidatePath("/customers");
-  redirect(`/customers/${customer.id}`);
+  return { customerId: customer.id };
 }
 
 export async function updateCustomerAction(
@@ -59,11 +58,10 @@ export async function updateCustomerAction(
 
   revalidatePath("/customers");
   revalidatePath(`/customers/${id}`);
-  redirect(`/customers/${id}`);
+  return { customerId: id };
 }
 
 export async function deleteCustomerAction(id: string) {
   await apiFetch(`/customers/${id}`, { method: "DELETE" });
   revalidatePath("/customers");
-  redirect("/customers");
 }

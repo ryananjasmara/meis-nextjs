@@ -1,6 +1,8 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import type { CustomerFormState } from "@/lib/actions/customers";
 import type { Customer } from "@/lib/types";
 
@@ -19,6 +21,19 @@ export function CustomerForm({
   submitLabel: string;
 }) {
   const [state, formAction, pending] = useActionState(action, undefined);
+  const router = useRouter();
+  const handledRef = useRef(state);
+
+  useEffect(() => {
+    if (!state || state === handledRef.current) return;
+    handledRef.current = state;
+    if (state.error) {
+      toast.error(state.error);
+    } else if (state.customerId) {
+      toast.success(customer ? "Customer updated." : "Customer created.");
+      router.push(`/customers/${state.customerId}`);
+    }
+  }, [state, customer, router]);
 
   return (
     <form action={formAction} className="space-y-4">
@@ -58,9 +73,6 @@ export function CustomerForm({
           className={inputClass}
         />
       </div>
-      {state?.error && (
-        <p className="rounded-md bg-red-950 px-3 py-2 text-sm text-red-300">{state.error}</p>
-      )}
       <button
         type="submit"
         disabled={pending}

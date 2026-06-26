@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { toast } from "sonner";
 import { Check, Trash2 } from "lucide-react";
 import { removeInvoiceItemAction, updateInvoiceItemAction } from "@/lib/actions/invoices";
 import { formatCurrency } from "@/lib/format";
@@ -15,13 +16,11 @@ export function EditableItemRow({ invoiceId, item }: { invoiceId: string; item: 
   const [unitPrice, setUnitPrice] = useState(item.unitPrice);
   const [isSaving, startSaving] = useTransition();
   const [isRemoving, startRemoving] = useTransition();
-  const [error, setError] = useState<string | null>(null);
 
   const pending = isSaving || isRemoving;
   const total = (Number(quantity) || 0) * (Number(unitPrice) || 0);
 
   function save() {
-    setError(null);
     startSaving(async () => {
       try {
         await updateInvoiceItemAction(invoiceId, item.id, {
@@ -29,19 +28,20 @@ export function EditableItemRow({ invoiceId, item }: { invoiceId: string; item: 
           quantity: Number(quantity),
           unitPrice: Number(unitPrice),
         });
+        toast.success("Item saved.");
       } catch {
-        setError("Could not save item.");
+        toast.error("Could not save item.");
       }
     });
   }
 
   function remove() {
-    setError(null);
     startRemoving(async () => {
       try {
         await removeInvoiceItemAction(invoiceId, item.id);
+        toast.success("Item removed.");
       } catch {
-        setError("Could not remove item.");
+        toast.error("Could not remove item.");
       }
     });
   }
@@ -99,7 +99,6 @@ export function EditableItemRow({ invoiceId, item }: { invoiceId: string; item: 
             <Trash2 className="size-4" />
           </button>
         </div>
-        {error && <p className="mt-1 text-right text-xs text-red-400">{error}</p>}
       </td>
     </tr>
   );

@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { FileStack, LayoutDashboard, LogOut, Receipt, Users } from "lucide-react";
+import { FileStack, LayoutDashboard, Receipt, Users } from "lucide-react";
 import { getCurrentUser } from "@/lib/session";
-import { logoutAction } from "@/lib/actions/auth";
+import { LogoutButton } from "@/components/logout-button";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const user = await getCurrentUser();
@@ -36,15 +36,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
                 {user.name} <span className="text-zinc-500">({user.role})</span>
               </span>
             )}
-            <form action={logoutAction}>
-              <button
-                type="submit"
-                className="flex items-center gap-1.5 font-medium text-zinc-50 hover:underline"
-              >
-                <LogOut className="size-4" />
-                Log out
-              </button>
-            </form>
+            <LogoutButton />
           </div>
         </div>
       </header>

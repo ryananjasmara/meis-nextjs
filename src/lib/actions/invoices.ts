@@ -1,11 +1,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { apiFetch, ApiError } from "@/lib/api";
 import type { Invoice, InvoiceStatus } from "@/lib/types";
 
-export type InvoiceFormState = { error?: string } | undefined;
+export type InvoiceFormState = { error?: string; invoiceId?: string; success?: boolean } | undefined;
 
 export async function createInvoiceAction(
   _prevState: InvoiceFormState,
@@ -46,7 +45,7 @@ export async function createInvoiceAction(
 
   revalidatePath("/invoices");
   revalidatePath("/dashboard");
-  redirect(`/invoices/${invoice.id}`);
+  return { invoiceId: invoice.id };
 }
 
 export async function updateInvoiceStatusAction(id: string, status: InvoiceStatus) {
@@ -80,6 +79,7 @@ export async function addInvoiceItemAction(
 
   revalidatePath(`/invoices/${invoiceId}`);
   revalidatePath("/dashboard");
+  return { success: true };
 }
 
 export async function removeInvoiceItemAction(invoiceId: string, itemId: string) {
