@@ -26,7 +26,7 @@ export function AddItemForm({ invoiceId }: { invoiceId: string }) {
         name="unitPrice"
         type="number"
         min="0"
-        step="0.01"
+        step="1"
         placeholder="Unit price"
         className={`w-28 ${inputClass}`}
       />

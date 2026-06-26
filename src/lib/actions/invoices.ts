@@ -87,3 +87,23 @@ export async function removeInvoiceItemAction(invoiceId: string, itemId: string)
   revalidatePath(`/invoices/${invoiceId}`);
   revalidatePath("/dashboard");
 }
+
+export async function updateInvoiceDueDateAction(invoiceId: string, dueDate: string) {
+  await apiFetch<Invoice>(`/invoices/${invoiceId}`, { method: "PATCH", body: { dueDate } });
+  revalidatePath(`/invoices/${invoiceId}`);
+  revalidatePath("/invoices");
+  revalidatePath("/dashboard");
+}
+
+export async function updateInvoiceItemAction(
+  invoiceId: string,
+  itemId: string,
+  payload: { description: string; quantity: number; unitPrice: number },
+) {
+  await apiFetch<Invoice>(`/invoices/${invoiceId}/items/${itemId}`, {
+    method: "PATCH",
+    body: payload,
+  });
+  revalidatePath(`/invoices/${invoiceId}`);
+  revalidatePath("/dashboard");
+}

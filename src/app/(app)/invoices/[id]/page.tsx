@@ -5,7 +5,8 @@ import { formatCurrency, formatDate } from "@/lib/format";
 import { StatusBadge } from "@/components/status-badge";
 import { StatusSelect } from "@/components/status-select";
 import { AddItemForm } from "@/components/add-item-form";
-import { RemoveItemButton } from "@/components/remove-item-button";
+import { EditableItemRow } from "@/components/editable-item-row";
+import { EditableDueDate } from "@/components/editable-due-date";
 import type { Invoice } from "@/lib/types";
 
 export default async function InvoiceDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -45,7 +46,13 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
         </div>
         <div>
           <p className="text-xs uppercase text-zinc-500">Due</p>
-          <p className="mt-1 text-sm text-zinc-50">{formatDate(invoice.dueDate)}</p>
+          {isDraft ? (
+            <div className="mt-1">
+              <EditableDueDate invoiceId={invoice.id} dueDate={invoice.dueDate} />
+            </div>
+          ) : (
+            <p className="mt-1 text-sm text-zinc-50">{formatDate(invoice.dueDate)}</p>
+          )}
         </div>
         <div>
           <p className="text-xs uppercase text-zinc-500">Total</p>
@@ -77,19 +84,18 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
             </tr>
           </thead>
           <tbody>
-            {invoice.items.map((item) => (
-              <tr key={item.id} className="border-b border-zinc-800/50 last:border-0">
-                <td className="px-5 py-3 text-zinc-50">{item.description}</td>
-                <td className="px-5 py-3 text-right text-zinc-300">{item.quantity}</td>
-                <td className="px-5 py-3 text-right text-zinc-300">{formatCurrency(item.unitPrice)}</td>
-                <td className="px-5 py-3 text-right text-zinc-50">{formatCurrency(item.total)}</td>
-                {isDraft && (
-                  <td className="px-5 py-3">
-                    <RemoveItemButton invoiceId={invoice.id} itemId={item.id} />
-                  </td>
-                )}
-              </tr>
-            ))}
+            {invoice.items.map((item) =>
+              isDraft ? (
+                <EditableItemRow key={item.id} invoiceId={invoice.id} item={item} />
+              ) : (
+                <tr key={item.id} className="border-b border-zinc-800/50 last:border-0">
+                  <td className="px-5 py-3 text-zinc-50">{item.description}</td>
+                  <td className="px-5 py-3 text-right text-zinc-300">{item.quantity}</td>
+                  <td className="px-5 py-3 text-right text-zinc-300">{formatCurrency(item.unitPrice)}</td>
+                  <td className="px-5 py-3 text-right text-zinc-50">{formatCurrency(item.total)}</td>
+                </tr>
+              ),
+            )}
           </tbody>
         </table>
         {isDraft && (

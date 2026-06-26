@@ -97,7 +97,7 @@ export function InvoiceForm({ customers }: { customers: Customer[] }) {
                 name="unitPrice"
                 type="number"
                 min="0"
-                step="0.01"
+                step="1"
                 placeholder="Unit price"
                 value={row.unitPrice}
                 onChange={(e) => updateRow(index, "unitPrice", e.target.value)}
