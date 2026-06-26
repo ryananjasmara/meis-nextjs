@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { FileStack, LayoutDashboard, Receipt, Users } from "lucide-react";
+import { FileStack, LayoutDashboard, Users } from "lucide-react";
 import { getCurrentUser } from "@/lib/session";
 import { LogoutButton } from "@/components/logout-button";
+import { Logo } from "@/components/logo";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const user = await getCurrentUser();
@@ -11,9 +12,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       <header className="border-b border-zinc-800 bg-zinc-900">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-8">
-            <span className="flex items-center gap-2 text-base font-semibold text-zinc-50">
-              mEis
-            </span>
+            <Logo />
             <nav className="flex gap-6 text-sm font-medium text-zinc-400">
               <Link href="/dashboard" className="flex items-center gap-1.5 hover:text-zinc-50">
                 <LayoutDashboard className="size-4" />
