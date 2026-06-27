@@ -35,7 +35,7 @@ export function EditableDueDate({ invoiceId, dueDate }: { invoiceId: string; due
         disabled={isPending}
         className="text-zinc-400 hover:text-zinc-50 disabled:opacity-50"
       >
-        <Check className="size-4" />
+        <Check className="size-4 text-green-500" />
       </button>
     </div>
   );

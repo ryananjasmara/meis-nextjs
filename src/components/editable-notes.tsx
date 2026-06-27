@@ -27,7 +27,6 @@ export function EditableNotes({ invoiceId, notes }: { invoiceId: string; notes: 
         rows={2}
         disabled={isPending}
         onChange={(e) => setValue(e.target.value)}
-        placeholder="Add a note, e.g. Net 30"
         className="w-full rounded-md border border-zinc-700 bg-zinc-900 px-2 py-1 text-sm text-zinc-100 placeholder:text-zinc-500 focus:border-zinc-500 focus:outline-none disabled:opacity-50"
       />
       <button
@@ -36,7 +35,7 @@ export function EditableNotes({ invoiceId, notes }: { invoiceId: string; notes: 
         disabled={isPending}
         className="mt-1 text-zinc-400 hover:text-zinc-50 disabled:opacity-50"
       >
-        <Check className="size-4" />
+        <Check className="size-4 text-green-500" />
       </button>
     </div>
   );
