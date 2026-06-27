@@ -37,8 +37,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
             </Link>
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          <StatusBadge status={invoice.status} />
+        <div className="flex items-center">
           <StatusSelect invoiceId={invoice.id} status={invoice.status} />
         </div>
       </div>
