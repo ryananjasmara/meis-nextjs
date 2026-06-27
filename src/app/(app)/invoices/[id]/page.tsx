@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Printer } from "lucide-react";
 import { apiFetch, ApiError } from "@/lib/api";
 import { formatCurrency, formatDate } from "@/lib/format";
 import { StatusBadge } from "@/components/status-badge";
@@ -40,6 +41,17 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
           <StatusBadge status={invoice.status} />
           <StatusSelect invoiceId={invoice.id} status={invoice.status} />
         </div>
+      </div>
+
+      <div className="flex justify-end">
+        <Link
+          href={`/invoices/${invoice.id}/print`}
+          target="_blank"
+          className="flex items-center gap-1.5 rounded-md border border-zinc-700 px-3 py-1.5 text-sm font-medium text-zinc-300 hover:bg-zinc-800"
+        >
+          <Printer className="size-4" />
+          Print / PDF
+        </Link>
       </div>
 
       <div className="grid grid-cols-3 gap-4 rounded-lg border border-zinc-800 bg-zinc-900 p-5 shadow-sm">
