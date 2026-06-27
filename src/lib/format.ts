@@ -1,9 +1,16 @@
-export function formatCurrency(value: string | number) {
+import type { Currency } from "@/lib/types";
+
+const CURRENCY_LOCALES: Record<Currency, string> = {
+  IDR: "id-ID",
+  USD: "en-US",
+};
+
+export function formatCurrency(value: string | number, currency: Currency = "IDR") {
   const n = typeof value === "string" ? Number(value) : value;
-  return new Intl.NumberFormat("id-ID", {
+  return new Intl.NumberFormat(CURRENCY_LOCALES[currency], {
     style: "currency",
-    currency: "IDR",
-    maximumFractionDigits: 0,
+    currency,
+    maximumFractionDigits: currency === "IDR" ? 0 : 2,
   }).format(n);
 }
 

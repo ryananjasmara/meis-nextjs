@@ -2,7 +2,7 @@ import Link from "next/link";
 import { BarChart3, Clock3, FileStack, ListChecks, Users, Wallet } from "lucide-react";
 import { apiFetch } from "@/lib/api";
 import { formatCurrency, formatDate } from "@/lib/format";
-import type { DashboardSummary, InvoiceStatus } from "@/lib/types";
+import type { Currency, DashboardSummary, InvoiceStatus } from "@/lib/types";
 import { StatCard } from "@/components/stat-card";
 import { StatusBadge } from "@/components/status-badge";
 
@@ -18,13 +18,44 @@ export default async function DashboardPage() {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard label="Customers" value={String(summary.totalCustomers)} icon={Users} />
         <StatCard label="Invoices" value={String(summary.totalInvoices)} icon={FileStack} />
-        <StatCard label="Revenue (paid)" value={formatCurrency(summary.totalRevenue)} icon={Wallet} />
+        <StatCard
+          label="Revenue (paid)"
+          value={formatCurrency(summary.totalRevenue)}
+          hint="IDR equiv."
+          icon={Wallet}
+        />
         <StatCard
           label="Outstanding"
           value={formatCurrency(summary.outstandingAmount)}
-          hint="Sent + overdue"
+          hint="Sent + overdue, IDR equiv."
           icon={Clock3}
         />
+      </div>
+
+      <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-5 shadow-sm">
+        <h2 className="flex items-center gap-2 text-sm font-medium text-zinc-300">
+          <Wallet className="size-4" />
+          Revenue by currency
+        </h2>
+        <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+          {Object.entries(summary.revenueByCurrency).map(([currency, amounts]) => (
+            <div key={currency} className="rounded-md border border-zinc-800 px-4 py-3">
+              <p className="text-xs font-medium uppercase text-zinc-500">{currency}</p>
+              <div className="mt-2 flex items-center justify-between text-sm">
+                <span className="text-zinc-400">Paid</span>
+                <span className="font-medium text-zinc-50">
+                  {formatCurrency(amounts.paid, currency as Currency)}
+                </span>
+              </div>
+              <div className="mt-1 flex items-center justify-between text-sm">
+                <span className="text-zinc-400">Outstanding</span>
+                <span className="font-medium text-zinc-50">
+                  {formatCurrency(amounts.outstanding, currency as Currency)}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
       <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-5 shadow-sm">
@@ -75,7 +106,9 @@ export default async function DashboardPage() {
                 <td className="px-5 py-3">
                   <StatusBadge status={invoice.status} />
                 </td>
-                <td className="px-5 py-3 text-right text-zinc-50">{formatCurrency(invoice.totalAmount)}</td>
+                <td className="px-5 py-3 text-right text-zinc-50">
+                  {formatCurrency(invoice.totalAmount, invoice.currency)}
+                </td>
               </tr>
             ))}
             {summary.recentInvoices.length === 0 && (

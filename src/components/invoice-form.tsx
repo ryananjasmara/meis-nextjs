@@ -7,7 +7,7 @@ import { Plus, Trash2 } from "lucide-react";
 import { createInvoiceAction } from "@/lib/actions/invoices";
 import { formatCurrency } from "@/lib/format";
 import { Select } from "@/components/select";
-import type { Customer } from "@/lib/types";
+import { CURRENCIES, type Currency, type Customer } from "@/lib/types";
 
 type Row = { description: string; quantity: string; unitPrice: string };
 
@@ -19,6 +19,8 @@ const inputClass =
 export function InvoiceForm({ customers }: { customers: Customer[] }) {
   const [state, formAction, pending] = useActionState(createInvoiceAction, undefined);
   const [rows, setRows] = useState<Row[]>([{ ...emptyRow }]);
+  const [currency, setCurrency] = useState<Currency>("IDR");
+  const [exchangeRate, setExchangeRate] = useState("1");
   const router = useRouter();
   const handledRef = useRef(state);
 
@@ -72,8 +74,48 @@ export function InvoiceForm({ customers }: { customers: Customer[] }) {
           <label htmlFor="notes" className="block text-sm font-medium text-zinc-300">
             Notes
           </label>
-          <input id="notes" name="notes" placeholder="Net 30" className={`mt-1 w-full ${inputClass}`} />
+          <input id="notes" name="notes" className={`mt-1 w-full ${inputClass}`} />
         </div>
+        <div>
+          <label htmlFor="currency" className="block text-sm font-medium text-zinc-300">
+            Currency
+          </label>
+          <Select
+            id="currency"
+            name="currency"
+            value={currency}
+            onChange={(e) => {
+              const next = e.target.value as Currency;
+              setCurrency(next);
+              if (next === "IDR") setExchangeRate("1");
+            }}
+            className="mt-1 w-full"
+          >
+            {CURRENCIES.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </Select>
+        </div>
+        {currency !== "IDR" && (
+          <div>
+            <label htmlFor="exchangeRate" className="block text-sm font-medium text-zinc-300">
+              Exchange rate (IDR)
+            </label>
+            <input
+              id="exchangeRate"
+              name="exchangeRate"
+              type="number"
+              min="1"
+              step="0.01"
+              required
+              value={exchangeRate}
+              onChange={(e) => setExchangeRate(e.target.value)}
+              className={`mt-1 w-full ${inputClass}`}
+            />
+          </div>
+        )}
       </div>
 
       <div>
@@ -131,7 +173,7 @@ export function InvoiceForm({ customers }: { customers: Customer[] }) {
         </div>
 
         <p className="mt-3 text-right text-sm font-medium text-zinc-300">
-          Total: {formatCurrency(total)}
+          Total: {formatCurrency(total, currency)}
         </p>
       </div>
 

@@ -99,7 +99,9 @@ export default async function InvoicesPage({
                 <td className="px-5 py-3">
                   <StatusBadge status={invoice.status} />
                 </td>
-                <td className="px-5 py-3 text-right text-zinc-50">{formatCurrency(invoice.totalAmount)}</td>
+                <td className="px-5 py-3 text-right text-zinc-50">
+                  {formatCurrency(invoice.totalAmount, invoice.currency)}
+                </td>
               </tr>
             ))}
             {invoices.length === 0 && (

@@ -1,5 +1,9 @@
 export type Role = "ADMIN" | "STAFF";
 
+export type Currency = "IDR" | "USD";
+
+export const CURRENCIES: Currency[] = ["IDR", "USD"];
+
 export type InvoiceStatus = "DRAFT" | "SENT" | "PAID" | "OVERDUE" | "CANCELLED";
 
 export const INVOICE_STATUSES: InvoiceStatus[] = [
@@ -42,6 +46,8 @@ export type Invoice = {
   status: InvoiceStatus;
   issueDate: string;
   dueDate: string;
+  currency: Currency;
+  exchangeRate: string;
   totalAmount: string;
   notes: string | null;
   customerId: string;
@@ -62,11 +68,14 @@ export type Paginated<T> = {
   meta: PaginationMeta;
 };
 
+export type CurrencyBreakdown = Record<Currency, { paid: string; outstanding: string }>;
+
 export type DashboardSummary = {
   totalCustomers: number;
   totalInvoices: number;
   totalRevenue: string;
   outstandingAmount: string;
+  revenueByCurrency: CurrencyBreakdown;
   invoicesByStatus: Record<InvoiceStatus, number>;
   recentInvoices: Invoice[];
 };

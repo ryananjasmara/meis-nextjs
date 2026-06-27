@@ -5,12 +5,20 @@ import { toast } from "sonner";
 import { Check, Trash2 } from "lucide-react";
 import { removeInvoiceItemAction, updateInvoiceItemAction } from "@/lib/actions/invoices";
 import { formatCurrency } from "@/lib/format";
-import type { InvoiceItem } from "@/lib/types";
+import type { Currency, InvoiceItem } from "@/lib/types";
 
 const cellInputClass =
   "rounded-md border border-zinc-700 bg-zinc-900 px-2 py-1 text-sm text-zinc-100 focus:border-zinc-500 focus:outline-none disabled:opacity-50";
 
-export function EditableItemRow({ invoiceId, item }: { invoiceId: string; item: InvoiceItem }) {
+export function EditableItemRow({
+  invoiceId,
+  item,
+  currency,
+}: {
+  invoiceId: string;
+  item: InvoiceItem;
+  currency: Currency;
+}) {
   const [description, setDescription] = useState(item.description);
   const [quantity, setQuantity] = useState(String(item.quantity));
   const [unitPrice, setUnitPrice] = useState(item.unitPrice);
@@ -77,7 +85,7 @@ export function EditableItemRow({ invoiceId, item }: { invoiceId: string; item: 
           className={`w-28 text-right ${cellInputClass}`}
         />
       </td>
-      <td className="px-5 py-2 text-right text-zinc-50">{formatCurrency(total)}</td>
+      <td className="px-5 py-2 text-right text-zinc-50">{formatCurrency(total, currency)}</td>
       <td className="px-5 py-2">
         <div className="flex items-center justify-end gap-3">
           <button
@@ -87,7 +95,7 @@ export function EditableItemRow({ invoiceId, item }: { invoiceId: string; item: 
             title="Save"
             className="text-zinc-400 hover:text-zinc-50 disabled:opacity-50"
           >
-            <Check className="size-4" />
+            <Check className="size-4 text-green-500" />
           </button>
           <button
             type="button"

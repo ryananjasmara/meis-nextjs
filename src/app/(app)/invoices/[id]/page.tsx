@@ -8,6 +8,7 @@ import { AddItemForm } from "@/components/add-item-form";
 import { EditableItemRow } from "@/components/editable-item-row";
 import { EditableDueDate } from "@/components/editable-due-date";
 import { EditableNotes } from "@/components/editable-notes";
+import { EditableCurrency } from "@/components/editable-currency";
 import type { Invoice } from "@/lib/types";
 
 export default async function InvoiceDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -57,8 +58,27 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
         </div>
         <div>
           <p className="text-xs uppercase text-zinc-500">Total</p>
-          <p className="mt-1 text-sm font-semibold text-zinc-50">{formatCurrency(invoice.totalAmount)}</p>
+          <p className="mt-1 text-sm font-semibold text-zinc-50">
+            {formatCurrency(invoice.totalAmount, invoice.currency)}
+          </p>
+          {!isDraft && invoice.currency !== "IDR" && (
+            <p className="mt-0.5 text-xs text-zinc-500">
+              {invoice.currency} · rate {Number(invoice.exchangeRate).toLocaleString("id-ID")}
+            </p>
+          )}
         </div>
+        {isDraft && (
+          <div className="col-span-3 border-t border-zinc-800 pt-3">
+            <p className="text-xs uppercase text-zinc-500">Currency</p>
+            <div className="mt-1">
+              <EditableCurrency
+                invoiceId={invoice.id}
+                currency={invoice.currency}
+                exchangeRate={invoice.exchangeRate}
+              />
+            </div>
+          </div>
+        )}
         {(isDraft || invoice.notes) && (
           <div className="col-span-3 border-t border-zinc-800 pt-3">
             <p className="text-xs uppercase text-zinc-500">Notes</p>
@@ -93,13 +113,17 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
           <tbody>
             {invoice.items.map((item) =>
               isDraft ? (
-                <EditableItemRow key={item.id} invoiceId={invoice.id} item={item} />
+                <EditableItemRow key={item.id} invoiceId={invoice.id} item={item} currency={invoice.currency} />
               ) : (
                 <tr key={item.id} className="border-b border-zinc-800/50 last:border-0">
                   <td className="px-5 py-3 text-zinc-50">{item.description}</td>
                   <td className="px-5 py-3 text-right text-zinc-300">{item.quantity}</td>
-                  <td className="px-5 py-3 text-right text-zinc-300">{formatCurrency(item.unitPrice)}</td>
-                  <td className="px-5 py-3 text-right text-zinc-50">{formatCurrency(item.total)}</td>
+                  <td className="px-5 py-3 text-right text-zinc-300">
+                    {formatCurrency(item.unitPrice, invoice.currency)}
+                  </td>
+                  <td className="px-5 py-3 text-right text-zinc-50">
+                    {formatCurrency(item.total, invoice.currency)}
+                  </td>
                 </tr>
               ),
             )}
