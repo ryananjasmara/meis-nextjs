@@ -105,7 +105,7 @@ export function CustomerInvoicesPanel({
                 <StatusBadge status={invoice.status} />
               </td>
               <td className="px-5 py-3 text-right text-zinc-50">
-                {formatCurrency(invoice.totalAmount, invoice.currency)}
+                {formatCurrency(invoice.grandTotal, invoice.currency)}
               </td>
             </tr>
           ))}

@@ -49,6 +49,10 @@ export type Invoice = {
   currency: Currency;
   exchangeRate: string;
   totalAmount: string;
+  isTaxable: boolean;
+  vatRate: string;
+  vatAmount: string;
+  grandTotal: string;
   notes: string | null;
   customerId: string;
   createdById: string;

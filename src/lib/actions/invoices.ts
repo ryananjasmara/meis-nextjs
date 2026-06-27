@@ -15,6 +15,7 @@ export async function createInvoiceAction(
   const notes = String(formData.get("notes") ?? "").trim();
   const currency = String(formData.get("currency") ?? "IDR");
   const exchangeRate = Number(formData.get("exchangeRate") ?? 1);
+  const isTaxable = formData.get("isTaxable") === "on";
 
   const descriptions = formData.getAll("description").map(String);
   const quantities = formData.getAll("quantity").map(Number);
@@ -39,7 +40,7 @@ export async function createInvoiceAction(
   try {
     invoice = await apiFetch<Invoice>("/invoices", {
       method: "POST",
-      body: { customerId, dueDate, notes: notes || undefined, currency, exchangeRate, items },
+      body: { customerId, dueDate, notes: notes || undefined, currency, exchangeRate, isTaxable, items },
     });
   } catch (err) {
     return { error: err instanceof ApiError ? err.message : "Could not create invoice." };
@@ -105,6 +106,16 @@ export async function updateInvoiceCurrencyAction(
   await apiFetch<Invoice>(`/invoices/${invoiceId}`, {
     method: "PATCH",
     body: { currency, exchangeRate },
+  });
+  revalidatePath(`/invoices/${invoiceId}`);
+  revalidatePath("/invoices");
+  revalidatePath("/dashboard");
+}
+
+export async function updateInvoiceTaxAction(invoiceId: string, isTaxable: boolean) {
+  await apiFetch<Invoice>(`/invoices/${invoiceId}`, {
+    method: "PATCH",
+    body: { isTaxable },
   });
   revalidatePath(`/invoices/${invoiceId}`);
   revalidatePath("/invoices");

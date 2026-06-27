@@ -9,6 +9,7 @@ import { EditableItemRow } from "@/components/editable-item-row";
 import { EditableDueDate } from "@/components/editable-due-date";
 import { EditableNotes } from "@/components/editable-notes";
 import { EditableCurrency } from "@/components/editable-currency";
+import { EditableTax } from "@/components/editable-tax";
 import type { Invoice } from "@/lib/types";
 
 export default async function InvoiceDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -59,13 +60,21 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
         <div>
           <p className="text-xs uppercase text-zinc-500">Total</p>
           <p className="mt-1 text-sm font-semibold text-zinc-50">
-            {formatCurrency(invoice.totalAmount, invoice.currency)}
+            {formatCurrency(invoice.grandTotal, invoice.currency)}
           </p>
-          {!isDraft && invoice.currency !== "IDR" && (
-            <p className="mt-0.5 text-xs text-zinc-500">
-              {invoice.currency} · rate {Number(invoice.exchangeRate).toLocaleString("id-ID")}
+          <div className="mt-1 space-y-0.5 text-xs text-zinc-500">
+            <p>Subtotal {formatCurrency(invoice.totalAmount, invoice.currency)}</p>
+            <p>
+              {invoice.isTaxable
+                ? `PPN (${(Number(invoice.vatRate) * 100).toFixed(0)}%) ${formatCurrency(invoice.vatAmount, invoice.currency)}`
+                : "Not subject to PPN"}
             </p>
-          )}
+            {!isDraft && invoice.currency !== "IDR" && (
+              <p>
+                {invoice.currency} · rate {Number(invoice.exchangeRate).toLocaleString("id-ID")}
+              </p>
+            )}
+          </div>
         </div>
         {isDraft && (
           <div className="col-span-3 border-t border-zinc-800 pt-3">
@@ -76,6 +85,14 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
                 currency={invoice.currency}
                 exchangeRate={invoice.exchangeRate}
               />
+            </div>
+          </div>
+        )}
+        {isDraft && (
+          <div className="col-span-3 border-t border-zinc-800 pt-3">
+            <p className="text-xs uppercase text-zinc-500">Tax</p>
+            <div className="mt-1">
+              <EditableTax invoiceId={invoice.id} isTaxable={invoice.isTaxable} vatRate={invoice.vatRate} />
             </div>
           </div>
         )}

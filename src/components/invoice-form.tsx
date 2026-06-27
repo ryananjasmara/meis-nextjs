@@ -13,6 +13,9 @@ type Row = { description: string; quantity: string; unitPrice: string };
 
 const emptyRow: Row = { description: "", quantity: "1", unitPrice: "0" };
 
+// Preview only — the canonical rate is snapshotted server-side at creation.
+const VAT_RATE_PREVIEW = 0.11;
+
 const inputClass =
   "rounded-md border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus:border-zinc-500 focus:outline-none";
 
@@ -21,6 +24,7 @@ export function InvoiceForm({ customers }: { customers: Customer[] }) {
   const [rows, setRows] = useState<Row[]>([{ ...emptyRow }]);
   const [currency, setCurrency] = useState<Currency>("IDR");
   const [exchangeRate, setExchangeRate] = useState("1");
+  const [isTaxable, setIsTaxable] = useState(true);
   const router = useRouter();
   const handledRef = useRef(state);
 
@@ -88,6 +92,7 @@ export function InvoiceForm({ customers }: { customers: Customer[] }) {
               const next = e.target.value as Currency;
               setCurrency(next);
               if (next === "IDR") setExchangeRate("1");
+              setIsTaxable(next === "IDR");
             }}
             className="mt-1 w-full"
           >
@@ -116,6 +121,18 @@ export function InvoiceForm({ customers }: { customers: Customer[] }) {
             />
           </div>
         )}
+        <div className="col-span-2">
+          <label className="flex items-center gap-2 text-sm text-zinc-100">
+            <input
+              type="checkbox"
+              name="isTaxable"
+              checked={isTaxable}
+              onChange={(e) => setIsTaxable(e.target.checked)}
+              className="size-4 rounded border-zinc-700 bg-zinc-900"
+            />
+            Subject to PPN ({(VAT_RATE_PREVIEW * 100).toFixed(0)}%)
+          </label>
+        </div>
       </div>
 
       <div>
@@ -172,9 +189,18 @@ export function InvoiceForm({ customers }: { customers: Customer[] }) {
           ))}
         </div>
 
-        <p className="mt-3 text-right text-sm font-medium text-zinc-300">
-          Total: {formatCurrency(total, currency)}
-        </p>
+        <div className="mt-3 space-y-1 text-right text-sm">
+          <p className="text-zinc-400">Subtotal: {formatCurrency(total, currency)}</p>
+          {isTaxable && (
+            <p className="text-zinc-400">
+              PPN ({(VAT_RATE_PREVIEW * 100).toFixed(0)}%):{" "}
+              {formatCurrency(total * VAT_RATE_PREVIEW, currency)}
+            </p>
+          )}
+          <p className="font-medium text-zinc-300">
+            Total: {formatCurrency(isTaxable ? total * (1 + VAT_RATE_PREVIEW) : total, currency)}
+          </p>
+        </div>
       </div>
 
       <button
