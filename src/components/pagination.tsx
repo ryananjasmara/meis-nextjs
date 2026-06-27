@@ -6,11 +6,15 @@ export function Pagination({
   query,
   page,
   totalPages,
+  total,
+  limit,
 }: {
   basePath: string;
   query: Record<string, string | undefined>;
   page: number;
   totalPages: number;
+  total: number;
+  limit: number;
 }) {
   function hrefFor(targetPage: number) {
     const params = new URLSearchParams();
@@ -23,11 +27,13 @@ export function Pagination({
 
   const isFirst = page <= 1;
   const isLast = page >= totalPages;
+  const rangeStart = total === 0 ? 0 : (page - 1) * limit + 1;
+  const rangeEnd = Math.min(total, page * limit);
 
   return (
     <div className="flex items-center justify-between border-t border-zinc-800 px-5 py-3 text-sm text-zinc-400">
       <span>
-        Page {page} of {totalPages}
+        Showing {rangeStart}–{rangeEnd} of {total}
       </span>
       <div className="flex gap-2">
         <Link

@@ -69,7 +69,14 @@ export default async function CustomersPage({
             )}
           </tbody>
         </table>
-        <Pagination basePath="/customers" query={{ search }} page={meta.page} totalPages={meta.totalPages} />
+        <Pagination
+          basePath="/customers"
+          query={{ search }}
+          page={meta.page}
+          totalPages={meta.totalPages}
+          total={meta.total}
+          limit={meta.limit}
+        />
       </div>
     </div>
   );

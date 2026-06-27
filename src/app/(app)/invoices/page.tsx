@@ -119,6 +119,8 @@ export default async function InvoicesPage({
           query={{ search, status }}
           page={meta.page}
           totalPages={meta.totalPages}
+          total={meta.total}
+          limit={meta.limit}
         />
       </div>
     </div>
