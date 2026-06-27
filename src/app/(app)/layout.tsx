@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { FileStack, LayoutDashboard, Users } from "lucide-react";
+import { FileStack, LayoutDashboard, ListTree, Users } from "lucide-react";
 import { getCurrentUser } from "@/lib/session";
 import { LogoutButton } from "@/components/logout-button";
 import { Logo } from "@/components/logo";
@@ -25,6 +25,10 @@ export default async function AppLayout({ children }: { children: React.ReactNod
               <Link href="/invoices" className="flex items-center gap-1.5 hover:text-zinc-50">
                 <FileStack className="size-4" />
                 Invoices
+              </Link>
+              <Link href="/charge-codes" className="flex items-center gap-1.5 hover:text-zinc-50">
+                <ListTree className="size-4" />
+                Charge codes
               </Link>
             </nav>
           </div>

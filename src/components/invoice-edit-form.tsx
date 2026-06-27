@@ -1,15 +1,15 @@
 "use client";
 
 import { useActionState, useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Plus, Trash2 } from "lucide-react";
-import { createInvoiceAction } from "@/lib/actions/invoices";
+import { updateInvoiceFullAction } from "@/lib/actions/invoices";
 import { formatCurrency } from "@/lib/format";
 import { Select } from "@/components/select";
-import { CURRENCIES, type ChargeCode, type Currency, type Customer } from "@/lib/types";
+import { CURRENCIES, type ChargeCode, type Currency, type Invoice } from "@/lib/types";
 
 type Row = {
+  id: string | null;
   description: string;
   quantity: string;
   unitPrice: string;
@@ -17,32 +17,42 @@ type Row = {
   isTaxable: boolean;
 };
 
-const emptyRow: Row = { description: "", quantity: "1", unitPrice: "0", chargeCodeId: "", isTaxable: true };
+const emptyRow: Row = { id: null, description: "", quantity: "1", unitPrice: "0", chargeCodeId: "", isTaxable: true };
 
-// Preview only — the canonical rate is snapshotted server-side at creation.
+// Preview only — the canonical rate is recalculated server-side on save.
 const VAT_RATE_PREVIEW = 0.11;
 
 const inputClass =
   "rounded-md border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus:border-zinc-500 focus:outline-none";
 
-export function InvoiceForm({ customers, chargeCodes }: { customers: Customer[]; chargeCodes: ChargeCode[] }) {
-  const [state, formAction, pending] = useActionState(createInvoiceAction, undefined);
-  const [rows, setRows] = useState<Row[]>([{ ...emptyRow, isTaxable: true }]);
-  const [currency, setCurrency] = useState<Currency>("IDR");
-  const [exchangeRate, setExchangeRate] = useState("1");
-  const router = useRouter();
+export function InvoiceEditForm({ invoice, chargeCodes }: { invoice: Invoice; chargeCodes: ChargeCode[] }) {
+  const action = updateInvoiceFullAction.bind(null, invoice.id);
+  const [state, formAction, pending] = useActionState(action, undefined);
   const handledRef = useRef(state);
+
+  const [rows, setRows] = useState<Row[]>(
+    invoice.items.map((item) => ({
+      id: item.id,
+      description: item.description,
+      quantity: String(item.quantity),
+      unitPrice: item.unitPrice,
+      chargeCodeId: item.chargeCodeId ?? "",
+      isTaxable: item.isTaxable,
+    })),
+  );
+  const [currency, setCurrency] = useState<Currency>(invoice.currency);
+  const [exchangeRate, setExchangeRate] = useState(invoice.exchangeRate);
+  const originalItemIds = invoice.items.map((item) => item.id);
 
   useEffect(() => {
     if (!state || state === handledRef.current) return;
     handledRef.current = state;
     if (state.error) {
       toast.error(state.error);
-    } else if (state.invoiceId) {
-      toast.success("Invoice created.");
-      router.push(`/invoices/${state.invoiceId}`);
+    } else if (state.success) {
+      toast.success("Invoice updated.");
     }
-  }, [state, router]);
+  }, [state]);
 
   const subtotal = rows.reduce((sum, row) => {
     const qty = Number(row.quantity) || 0;
@@ -74,35 +84,35 @@ export function InvoiceForm({ customers, chargeCodes }: { customers: Customer[];
   }
 
   return (
-    <form action={formAction} className="space-y-6">
-      <div>
-        <label htmlFor="customerId" className="block text-sm font-medium text-zinc-300">
-          Customer
-        </label>
-        <Select id="customerId" name="customerId" required defaultValue="" className="mt-1 w-full">
-          <option value="" disabled>
-            Select a customer
-          </option>
-          {customers.map((customer) => (
-            <option key={customer.id} value={customer.id}>
-              {customer.name}
-            </option>
-          ))}
-        </Select>
-      </div>
+    <form action={formAction} className="space-y-6 rounded-lg border border-zinc-800 bg-zinc-900 p-6 shadow-sm">
+      {originalItemIds.map((id) => (
+        <input key={id} type="hidden" name="originalItemId" value={id} />
+      ))}
 
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label htmlFor="dueDate" className="block text-sm font-medium text-zinc-300">
             Due date
           </label>
-          <input id="dueDate" name="dueDate" type="date" required className={`mt-1 w-full ${inputClass}`} />
+          <input
+            id="dueDate"
+            name="dueDate"
+            type="date"
+            required
+            defaultValue={invoice.dueDate.slice(0, 10)}
+            className={`mt-1 w-full ${inputClass}`}
+          />
         </div>
         <div>
           <label htmlFor="notes" className="block text-sm font-medium text-zinc-300">
             Notes
           </label>
-          <input id="notes" name="notes" className={`mt-1 w-full ${inputClass}`} />
+          <input
+            id="notes"
+            name="notes"
+            defaultValue={invoice.notes ?? ""}
+            className={`mt-1 w-full ${inputClass}`}
+          />
         </div>
         <div>
           <label htmlFor="currency" className="block text-sm font-medium text-zinc-300">
@@ -230,6 +240,7 @@ export function InvoiceForm({ customers, chargeCodes }: { customers: Customer[];
                   />
                   Taxable
                 </label>
+                <input type="hidden" name="itemId" value={row.id ?? ""} />
                 <input type="hidden" name="chargeCodeId" value={row.chargeCodeId} />
                 <input type="hidden" name="isTaxable" value={row.isTaxable ? "true" : "false"} />
               </div>
@@ -251,7 +262,7 @@ export function InvoiceForm({ customers, chargeCodes }: { customers: Customer[];
         disabled={pending}
         className="rounded-md bg-zinc-100 px-4 py-2 text-sm font-medium text-zinc-900 hover:bg-white disabled:opacity-50"
       >
-        {pending ? "Creating…" : "Create invoice"}
+        {pending ? "Saving…" : "Save changes"}
       </button>
     </form>
   );

@@ -15,17 +15,20 @@ export async function createInvoiceAction(
   const notes = String(formData.get("notes") ?? "").trim();
   const currency = String(formData.get("currency") ?? "IDR");
   const exchangeRate = Number(formData.get("exchangeRate") ?? 1);
-  const isTaxable = formData.get("isTaxable") === "on";
 
   const descriptions = formData.getAll("description").map(String);
   const quantities = formData.getAll("quantity").map(Number);
   const unitPrices = formData.getAll("unitPrice").map(Number);
+  const chargeCodeIds = formData.getAll("chargeCodeId").map(String);
+  const isTaxables = formData.getAll("isTaxable").map((v) => v === "true");
 
   const items = descriptions
     .map((description, i) => ({
       description: description.trim(),
       quantity: quantities[i],
       unitPrice: unitPrices[i],
+      chargeCodeId: chargeCodeIds[i] || undefined,
+      isTaxable: isTaxables[i],
     }))
     .filter((item) => item.description && item.quantity > 0 && item.unitPrice >= 0);
 
@@ -40,7 +43,7 @@ export async function createInvoiceAction(
   try {
     invoice = await apiFetch<Invoice>("/invoices", {
       method: "POST",
-      body: { customerId, dueDate, notes: notes || undefined, currency, exchangeRate, isTaxable, items },
+      body: { customerId, dueDate, notes: notes || undefined, currency, exchangeRate, items },
     });
   } catch (err) {
     return { error: err instanceof ApiError ? err.message : "Could not create invoice." };
@@ -58,84 +61,84 @@ export async function updateInvoiceStatusAction(id: string, status: InvoiceStatu
   revalidatePath("/dashboard");
 }
 
-export async function addInvoiceItemAction(
+export async function updateInvoiceFullAction(
   invoiceId: string,
   _prevState: InvoiceFormState,
   formData: FormData,
 ): Promise<InvoiceFormState> {
-  const description = String(formData.get("description") ?? "").trim();
-  const quantity = Number(formData.get("quantity"));
-  const unitPrice = Number(formData.get("unitPrice"));
+  const dueDate = String(formData.get("dueDate") ?? "");
+  const notes = String(formData.get("notes") ?? "").trim();
+  const currency = String(formData.get("currency") ?? "IDR") as Currency;
+  const exchangeRate = Number(formData.get("exchangeRate") ?? 1);
 
-  if (!description || !quantity || quantity <= 0 || Number.isNaN(unitPrice) || unitPrice < 0) {
-    return { error: "Enter a description, a positive quantity, and a valid unit price." };
+  const itemIds = formData.getAll("itemId").map(String);
+  const descriptions = formData.getAll("description").map(String);
+  const quantities = formData.getAll("quantity").map(Number);
+  const unitPrices = formData.getAll("unitPrice").map(Number);
+  const chargeCodeIds = formData.getAll("chargeCodeId").map(String);
+  const isTaxables = formData.getAll("isTaxable").map((v) => v === "true");
+  const originalItemIds = formData.getAll("originalItemId").map(String);
+
+  const rows = itemIds
+    .map((itemId, i) => ({
+      itemId: itemId || undefined,
+      description: descriptions[i].trim(),
+      quantity: quantities[i],
+      unitPrice: unitPrices[i],
+      chargeCodeId: chargeCodeIds[i] || undefined,
+      isTaxable: isTaxables[i],
+    }))
+    .filter((row) => row.description && row.quantity > 0 && row.unitPrice >= 0);
+
+  if (!dueDate) {
+    return { error: "Due date is required." };
+  }
+  if (rows.length === 0) {
+    return { error: "At least one valid line item is required." };
   }
 
   try {
-    await apiFetch<Invoice>(`/invoices/${invoiceId}/items`, {
-      method: "POST",
-      body: { description, quantity, unitPrice },
+    await apiFetch<Invoice>(`/invoices/${invoiceId}`, {
+      method: "PATCH",
+      body: { dueDate, notes: notes || undefined, currency, exchangeRate },
     });
+
+    for (const row of rows.filter((r) => !r.itemId)) {
+      await apiFetch<Invoice>(`/invoices/${invoiceId}/items`, {
+        method: "POST",
+        body: {
+          description: row.description,
+          quantity: row.quantity,
+          unitPrice: row.unitPrice,
+          chargeCodeId: row.chargeCodeId,
+          isTaxable: row.isTaxable,
+        },
+      });
+    }
+
+    for (const row of rows.filter((r) => r.itemId)) {
+      await apiFetch<Invoice>(`/invoices/${invoiceId}/items/${row.itemId}`, {
+        method: "PATCH",
+        body: {
+          description: row.description,
+          quantity: row.quantity,
+          unitPrice: row.unitPrice,
+          chargeCodeId: row.chargeCodeId,
+          isTaxable: row.isTaxable,
+        },
+      });
+    }
+
+    const keptIds = new Set(rows.map((r) => r.itemId).filter(Boolean));
+    for (const id of originalItemIds.filter((id) => !keptIds.has(id))) {
+      await apiFetch<Invoice>(`/invoices/${invoiceId}/items/${id}`, { method: "DELETE" });
+    }
   } catch (err) {
-    return { error: err instanceof ApiError ? err.message : "Could not add item." };
+    return { error: err instanceof ApiError ? err.message : "Could not update invoice." };
   }
 
   revalidatePath(`/invoices/${invoiceId}`);
+  revalidatePath("/invoices");
   revalidatePath("/dashboard");
   return { success: true };
-}
-
-export async function removeInvoiceItemAction(invoiceId: string, itemId: string) {
-  await apiFetch<Invoice>(`/invoices/${invoiceId}/items/${itemId}`, { method: "DELETE" });
-  revalidatePath(`/invoices/${invoiceId}`);
-  revalidatePath("/dashboard");
-}
-
-export async function updateInvoiceDueDateAction(invoiceId: string, dueDate: string) {
-  await apiFetch<Invoice>(`/invoices/${invoiceId}`, { method: "PATCH", body: { dueDate } });
-  revalidatePath(`/invoices/${invoiceId}`);
-  revalidatePath("/invoices");
-  revalidatePath("/dashboard");
-}
-
-export async function updateInvoiceCurrencyAction(
-  invoiceId: string,
-  currency: Currency,
-  exchangeRate: number,
-) {
-  await apiFetch<Invoice>(`/invoices/${invoiceId}`, {
-    method: "PATCH",
-    body: { currency, exchangeRate },
-  });
-  revalidatePath(`/invoices/${invoiceId}`);
-  revalidatePath("/invoices");
-  revalidatePath("/dashboard");
-}
-
-export async function updateInvoiceTaxAction(invoiceId: string, isTaxable: boolean) {
-  await apiFetch<Invoice>(`/invoices/${invoiceId}`, {
-    method: "PATCH",
-    body: { isTaxable },
-  });
-  revalidatePath(`/invoices/${invoiceId}`);
-  revalidatePath("/invoices");
-  revalidatePath("/dashboard");
-}
-
-export async function updateInvoiceNotesAction(invoiceId: string, notes: string) {
-  await apiFetch<Invoice>(`/invoices/${invoiceId}`, { method: "PATCH", body: { notes } });
-  revalidatePath(`/invoices/${invoiceId}`);
-}
-
-export async function updateInvoiceItemAction(
-  invoiceId: string,
-  itemId: string,
-  payload: { description: string; quantity: number; unitPrice: number },
-) {
-  await apiFetch<Invoice>(`/invoices/${invoiceId}/items/${itemId}`, {
-    method: "PATCH",
-    body: payload,
-  });
-  revalidatePath(`/invoices/${invoiceId}`);
-  revalidatePath("/dashboard");
 }

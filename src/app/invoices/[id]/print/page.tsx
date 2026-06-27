@@ -65,6 +65,7 @@ export default async function InvoicePrintPage({ params }: { params: Promise<{ i
               <th className="py-2">Description</th>
               <th className="py-2 text-right">Qty</th>
               <th className="py-2 text-right">Unit price</th>
+              <th className="py-2 text-center">Taxable</th>
               <th className="py-2 text-right">Total</th>
             </tr>
           </thead>
@@ -74,6 +75,7 @@ export default async function InvoicePrintPage({ params }: { params: Promise<{ i
                 <td className="py-2.5">{item.description}</td>
                 <td className="py-2.5 text-right">{item.quantity}</td>
                 <td className="py-2.5 text-right">{formatCurrency(item.unitPrice, invoice.currency)}</td>
+                <td className="py-2.5 text-center">{item.isTaxable ? "Yes" : "No"}</td>
                 <td className="py-2.5 text-right">{formatCurrency(item.total, invoice.currency)}</td>
               </tr>
             ))}
@@ -87,8 +89,10 @@ export default async function InvoicePrintPage({ params }: { params: Promise<{ i
               <span>{formatCurrency(invoice.totalAmount, invoice.currency)}</span>
             </div>
             <div className="flex justify-between text-zinc-600">
-              <span>{invoice.isTaxable ? `PPN (${(Number(invoice.vatRate) * 100).toFixed(0)}%)` : "PPN"}</span>
-              <span>{invoice.isTaxable ? formatCurrency(invoice.vatAmount, invoice.currency) : "—"}</span>
+              <span>PPN ({(Number(invoice.vatRate) * 100).toFixed(0)}%)</span>
+              <span>
+                {Number(invoice.vatAmount) > 0 ? formatCurrency(invoice.vatAmount, invoice.currency) : "—"}
+              </span>
             </div>
             <div className="flex justify-between border-t border-zinc-300 pt-1 font-semibold">
               <span>Total</span>

@@ -31,12 +31,23 @@ export type Customer = {
   updatedAt: string;
 };
 
+export type ChargeCode = {
+  id: string;
+  code: string;
+  description: string;
+  isTaxable: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type InvoiceItem = {
   id: string;
   description: string;
   quantity: number;
   unitPrice: string;
   total: string;
+  isTaxable: boolean;
+  chargeCodeId: string | null;
   invoiceId: string;
 };
 
@@ -49,7 +60,6 @@ export type Invoice = {
   currency: Currency;
   exchangeRate: string;
   totalAmount: string;
-  isTaxable: boolean;
   vatRate: string;
   vatAmount: string;
   grandTotal: string;
