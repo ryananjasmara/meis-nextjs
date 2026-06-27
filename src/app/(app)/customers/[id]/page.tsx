@@ -1,16 +1,22 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Receipt } from "lucide-react";
 import { apiFetch, ApiError } from "@/lib/api";
 import { updateCustomerAction } from "@/lib/actions/customers";
 import { CustomerForm } from "@/components/customer-form";
 import { DeleteCustomerButton } from "@/components/delete-customer-button";
-import { StatusBadge } from "@/components/status-badge";
-import { formatCurrency } from "@/lib/format";
-import type { Customer, Invoice, Paginated } from "@/lib/types";
+import { CustomerInvoicesPanel } from "@/components/customer-invoices-panel";
+import type { Customer, Invoice, InvoiceStatus, Paginated } from "@/lib/types";
 
-export default async function CustomerDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function CustomerDetailPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ status?: string; search?: string; page?: string }>;
+}) {
   const { id } = await params;
+  const { status, search, page } = await searchParams;
+  const currentPage = page ? Number(page) : 1;
 
   let customer: Customer;
   try {
@@ -20,9 +26,14 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
     throw err;
   }
 
-  const { data: customerInvoices } = await apiFetch<Paginated<Invoice>>(
-    `/invoices?customerId=${id}&limit=100`,
-  );
+  const query = new URLSearchParams();
+  query.set("customerId", id);
+  if (status) query.set("status", status);
+  if (search) query.set("search", search);
+  query.set("page", String(currentPage));
+  query.set("limit", "10");
+
+  const initialInvoices = await apiFetch<Paginated<Invoice>>(`/invoices?${query}`);
 
   const boundUpdate = updateCustomerAction.bind(null, id);
 
@@ -44,28 +55,12 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
             Invoices
           </h2>
         </div>
-        <table className="w-full text-sm">
-          <tbody>
-            {customerInvoices.map((invoice) => (
-              <tr key={invoice.id} className="border-b border-zinc-800/50 last:border-0">
-                <td className="px-5 py-3">
-                  <Link href={`/invoices/${invoice.id}`} className="font-medium text-zinc-50 hover:underline">
-                    {invoice.invoiceNumber}
-                  </Link>
-                </td>
-                <td className="px-5 py-3">
-                  <StatusBadge status={invoice.status} />
-                </td>
-                <td className="px-5 py-3 text-right text-zinc-50">{formatCurrency(invoice.totalAmount)}</td>
-              </tr>
-            ))}
-            {customerInvoices.length === 0 && (
-              <tr>
-                <td className="px-5 py-6 text-center text-zinc-500">No invoices for this customer yet.</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+        <CustomerInvoicesPanel
+          customerId={id}
+          initialData={initialInvoices}
+          initialStatus={status as InvoiceStatus | undefined}
+          initialSearch={search}
+        />
       </div>
     </div>
   );
